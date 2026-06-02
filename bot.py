@@ -30,24 +30,57 @@ SYSTEM_PROMPT = """Ты — психологический помощник пр
 
 КУРСЫ И ТЕСТЫ НА САЙТЕ SOL-YA.COM (рекомендуй органично, когда тема подходит):
 
-КУРСЫ (PDF, доставляются на email после оплаты):
-• «Токсичные отношения» — когда больно, но уйти невозможно. 12 уроков: газлайтинг, манипуляции, созависимость, выход. sol-ya.com/courses/toxic
-• «Тревожная привязанность» — цепляешься, ревнуешь, боишься потерять. КПТ + EMDR-элементы, 12 уроков. sol-ya.com/courses/anxious
-• «Антивыгорание» — когда устала от всего. sol-ya.com/courses/burnout
-• «Мама, отпусти!» — сепарация от родителей. sol-ya.com/courses/separation
-• «Прокрастинация» — почему откладываем и как перестать. sol-ya.com/courses/procrastination
-• «Самооценка» — восстановление отношений с собой. sol-ya.com/courses/self-esteem
-• «Границы» — как выстраивать и защищать. sol-ya.com/courses/boundaries
-• «Тревога» — работа с тревожными состояниями. sol-ya.com/courses/anxiety
+АКТИВНЫЕ КУРСЫ (PDF, доставляются на email после оплаты):
+• «НЕТ тревоге» — https://www.sol-ya.com/courses/net-trevoge
+• «Тревожная привязанность» — цепляешься, ревнуешь, боишься потерять. КПТ + EMDR, 12 уроков — https://www.sol-ya.com/courses/trevozhnaya-privyazannost
+• «Перестать спасать» — https://www.sol-ya.com/perestat-spasat
+• «Токсичные отношения» — когда больно, но уйти невозможно. 12 уроков — https://www.sol-ya.com/courses/toksichnye-otnosheniya
+• «Близость без потери себя» — https://www.sol-ya.com/courses/blizost-bez-poteri-sebya
+• «Найти опору в себе» — https://www.sol-ya.com/courses/najti-oporu-v-sebe
+• «Синдром самозванца» — https://www.sol-ya.com/courses/sindrom-samozvantsa
+• «Перфекционизм» — https://www.sol-ya.com/courses/perfektsionizm
+• «Мама, отпусти!» — сепарация от родителей — https://www.sol-ya.com/courses/mama-otpusti
+• «Антивыгорание» — когда устала от всего — https://www.sol-ya.com/courses/antivigoranie
+• «Прокрастинация» — https://www.sol-ya.com/courses/prokrastinatsiya
 
-ТЕСТЫ (бесплатные, на сайте):
-• Тест на тип привязанности — sol-ya.com/tests/attachment
-• Тест на уровень выгорания — sol-ya.com/tests/burnout
-• Тест на токсичность отношений — sol-ya.com/tests/toxic
-• Тест на уровень тревоги — sol-ya.com/tests/anxiety
-• Тест на самооценку — sol-ya.com/tests/self-esteem
+СКОРО (не рекомендуй, они ещё не готовы): Тело под стрессом, Сон и тревога, Одна и ок, Кризис смысла, Горе и потери
 
-КОНСУЛЬТАЦИИ с Ольгой: sol-ya.com/consultation
+ТЕСТЫ (все бесплатные, на сайте):
+• Тест на тревожность (BAI) — https://www.sol-ya.com/tests/beck-anxiety
+• Тест на тип привязанности ECR-R — https://www.sol-ya.com/tests/ecr-r
+• Шкала осложнённого горя — https://www.sol-ya.com/tests/gore
+• Тест на границы в отношениях — https://www.sol-ya.com/tests/granitsy
+• Тест качества сна ISI — https://www.sol-ya.com/tests/isi
+• Тест треугольник Карпмана — https://www.sol-ya.com/tests/karpman
+• Тест на выгорание (MBI Маслач) — https://www.sol-ya.com/tests/maslach
+• Тест на перфекционизм FMPS — https://www.sol-ya.com/tests/perfekcionizm
+• Тест на прокрастинацию GPS — https://www.sol-ya.com/tests/prokrastinaciya
+• Шкала стресса PSS-10 — https://www.sol-ya.com/tests/pss10
+• Тест на самооценку Розенберга — https://www.sol-ya.com/tests/rozenberg
+• Тест на синдром самозванца — https://www.sol-ya.com/tests/samozvanec
+• Тест на сепарацию от родителей — https://www.sol-ya.com/tests/separaciya
+• Тест смысложизненных ориентаций — https://www.sol-ya.com/tests/szho
+• Шкала одиночества UCLA — https://www.sol-ya.com/tests/ucla
+• Тест на газлайтинг VGQ — https://www.sol-ya.com/tests/vgq
+
+БЕСПЛАТНЫЕ СТАТЬИ (рекомендуй когда хочется дать что-то почитать прямо сейчас):
+• Тревога: что за ней стоит — https://www.sol-ya.com/articles/trevoga
+• Скрытое выгорание — https://www.sol-ya.com/articles/vygoranie
+• Тревожная привязанность — https://www.sol-ya.com/articles/trevozhnaya-privyazannost
+• Синдром спасателя — https://www.sol-ya.com/articles/spasatelstvo
+• Созависимость — https://www.sol-ya.com/articles/sozavisimost
+• Прокрастинация — это не лень — https://www.sol-ya.com/articles/prokrastinaciya
+• Синдром самозванца — https://www.sol-ya.com/articles/sindrom-samozvanca
+• Удобный ребёнок — https://www.sol-ya.com/articles/udobny-rebenok
+• Перфекционизм — https://www.sol-ya.com/articles/perfekcionizm
+• Дисфункциональная семья — https://www.sol-ya.com/articles/disfunkciya-semi
+• Контроль как защита — https://www.sol-ya.com/articles/kontrol
+• Тело под стрессом — https://www.sol-ya.com/articles/telo-pod-stressom
+• Токсичные отношения — https://www.sol-ya.com/articles/toksichnye-otnosheniya
+• Близость без потери себя — https://www.sol-ya.com/articles/blizost-bez-poteri-sebya
+• Одна и ок — https://www.sol-ya.com/articles/odna-i-ok
+
+КОНСУЛЬТАЦИИ с Ольгой: https://www.sol-ya.com/consultation
 
 ПРАВИЛА РАБОТЫ:
 1. Сначала выслушай и поддержи — не торопись с советами и рекомендациями
@@ -108,16 +141,18 @@ async def cmd_help(message: Message):
 async def cmd_courses(message: Message):
     courses_text = (
         "*Курсы SOL & YA* 📚\n\n"
-        "🔸 [Токсичные отношения](https://sol-ya.com/courses/toxic) — когда больно, но уйти невозможно\n"
-        "🔸 [Тревожная привязанность](https://sol-ya.com/courses/anxious) — ревность, страх потери, цепляние\n"
-        "🔸 [Антивыгорание](https://sol-ya.com/courses/burnout) — когда устала от всего\n"
-        "🔸 [Мама, отпусти!](https://sol-ya.com/courses/separation) — сепарация от родителей\n"
-        "🔸 [Прокрастинация](https://sol-ya.com/courses/procrastination) — почему откладываем\n"
-        "🔸 [Самооценка](https://sol-ya.com/courses/self-esteem) — восстановление отношений с собой\n"
-        "🔸 [Границы](https://sol-ya.com/courses/boundaries) — как выстраивать и защищать\n"
-        "🔸 [Тревога](https://sol-ya.com/courses/anxiety) — работа с тревожными состояниями\n\n"
-        "Все курсы — PDF с теорией, практиками и заданиями. Доставляются на email.\n"
-        "Полный список: [sol-ya.com/courses](https://sol-ya.com/courses)"
+        "🔸 [НЕТ тревоге](https://www.sol-ya.com/courses/net-trevoge)\n"
+        "🔸 [Тревожная привязанность](https://www.sol-ya.com/courses/trevozhnaya-privyazannost)\n"
+        "🔸 [Токсичные отношения](https://www.sol-ya.com/courses/toksichnye-otnosheniya)\n"
+        "🔸 [Близость без потери себя](https://www.sol-ya.com/courses/blizost-bez-poteri-sebya)\n"
+        "🔸 [Перестать спасать](https://www.sol-ya.com/perestat-spasat)\n"
+        "🔸 [Найти опору в себе](https://www.sol-ya.com/courses/najti-oporu-v-sebe)\n"
+        "🔸 [Синдром самозванца](https://www.sol-ya.com/courses/sindrom-samozvantsa)\n"
+        "🔸 [Перфекционизм](https://www.sol-ya.com/courses/perfektsionizm)\n"
+        "🔸 [Мама, отпусти!](https://www.sol-ya.com/courses/mama-otpusti)\n"
+        "🔸 [Антивыгорание](https://www.sol-ya.com/courses/antivigoranie)\n"
+        "🔸 [Прокрастинация](https://www.sol-ya.com/courses/prokrastinatsiya)\n\n"
+        "Все курсы — PDF с теорией, практиками и заданиями. Доставляются на email 📧"
     )
     await message.answer(courses_text)
 
@@ -126,11 +161,22 @@ async def cmd_courses(message: Message):
 async def cmd_tests(message: Message):
     tests_text = (
         "*Бесплатные тесты* 🔍\n\n"
-        "✅ [Тип привязанности](https://sol-ya.com/tests/attachment)\n"
-        "✅ [Уровень выгорания](https://sol-ya.com/tests/burnout)\n"
-        "✅ [Токсичность отношений](https://sol-ya.com/tests/toxic)\n"
-        "✅ [Уровень тревоги](https://sol-ya.com/tests/anxiety)\n"
-        "✅ [Самооценка](https://sol-ya.com/tests/self-esteem)\n\n"
+        "✅ [Тревожность BAI](https://www.sol-ya.com/tests/beck-anxiety)\n"
+        "✅ [Тип привязанности ECR-R](https://www.sol-ya.com/tests/ecr-r)\n"
+        "✅ [Границы в отношениях](https://www.sol-ya.com/tests/granitsy)\n"
+        "✅ [Газлайтинг VGQ](https://www.sol-ya.com/tests/vgq)\n"
+        "✅ [Выгорание Маслач](https://www.sol-ya.com/tests/maslach)\n"
+        "✅ [Самооценка Розенберга](https://www.sol-ya.com/tests/rozenberg)\n"
+        "✅ [Синдром самозванца](https://www.sol-ya.com/tests/samozvanec)\n"
+        "✅ [Сепарация от родителей](https://www.sol-ya.com/tests/separaciya)\n"
+        "✅ [Перфекционизм FMPS](https://www.sol-ya.com/tests/perfekcionizm)\n"
+        "✅ [Прокрастинация GPS](https://www.sol-ya.com/tests/prokrastinaciya)\n"
+        "✅ [Стресс PSS-10](https://www.sol-ya.com/tests/pss10)\n"
+        "✅ [Треугольник Карпмана](https://www.sol-ya.com/tests/karpman)\n"
+        "✅ [Качество сна ISI](https://www.sol-ya.com/tests/isi)\n"
+        "✅ [Одиночество UCLA](https://www.sol-ya.com/tests/ucla)\n"
+        "✅ [Смысл жизни СЖО](https://www.sol-ya.com/tests/szho)\n"
+        "✅ [Осложнённое горе ICG](https://www.sol-ya.com/tests/gore)\n\n"
         "Все тесты бесплатны, результат приходит на email 📧"
     )
     await message.answer(tests_text)
