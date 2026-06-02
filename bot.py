@@ -2,7 +2,7 @@ import asyncio
 import logging
 import os
 from collections import defaultdict
-from datetime import datetime, time
+from datetime import datetime
 from anthropic import AsyncAnthropic
 
 from aiogram import Bot, Dispatcher, F
@@ -16,25 +16,23 @@ logger = logging.getLogger(__name__)
 
 BOT_TOKEN = os.environ["BOT_TOKEN"]
 ANTHROPIC_API_KEY = os.environ["ANTHROPIC_API_KEY"]
-ADMIN_ID = int(os.environ.get("ADMIN_ID", "0"))  # твой Telegram ID
+ADMIN_ID = int(os.environ.get("ADMIN_ID", "0"))
 
 bot = Bot(token=BOT_TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.MARKDOWN))
 dp = Dispatcher()
 client = AsyncAnthropic(api_key=ANTHROPIC_API_KEY)
 
-# История диалогов
 chat_histories: dict[int, list[dict]] = defaultdict(list)
 MAX_HISTORY = 20
 
-# Статистика за день
+# Полные логи разговоров: user_id -> список сообщений с метками времени
+full_logs: dict[int, list[dict]] = defaultdict(list)
+
 daily_stats: dict = {
     "users": set(),
     "messages": 0,
-    "topics": [],
-    "courses_mentioned": defaultdict(int),
-    "tests_mentioned": defaultdict(int),
     "new_users": set(),
-    "user_info": {}  # user_id -> {name, username, first_seen}
+    "user_info": {}
 }
 
 SYSTEM_PROMPT = """Ты — психологический помощник проекта SOL & YA (практикующий психолог Шарова Ольга, сайт sol-ya.com).
@@ -105,15 +103,14 @@ SYSTEM_PROMPT = """Ты — психологический помощник пр
 7. Ты бесплатный помощник — курсы рекомендуй как возможность углубиться, не навязывай"""
 
 
-def update_stats(user: any, text: str, is_new: bool):
-    """Обновляем статистику"""
+def update_stats(user, text: str, is_new: bool, role: str = "user"):
     uid = user.id
     daily_stats["users"].add(uid)
-    daily_stats["messages"] += 1
+    if role == "user":
+        daily_stats["messages"] += 1
     if is_new:
         daily_stats["new_users"].add(uid)
 
-    # Сохраняем инфо о пользователе
     name = f"{user.first_name or ''} {user.last_name or ''}".strip() or "Без имени"
     username = f"@{user.username}" if user.username else "нет username"
     if uid not in daily_stats["user_info"]:
@@ -123,32 +120,15 @@ def update_stats(user: any, text: str, is_new: bool):
             "first_seen": datetime.now().strftime("%H:%M")
         }
 
-    # Топ тем — первые слова сообщения
-    if len(text) > 10:
-        daily_stats["topics"].append(text[:80])
-
-    # Упоминания курсов
-    courses = {
-        "тревог": "НЕТ тревоге",
-        "привязанност": "Тревожная привязанность",
-        "токсич": "Токсичные отношения",
-        "выгоран": "Антивыгорание",
-        "мама": "Мама, отпусти",
-        "прокрастин": "Прокрастинация",
-        "самозванц": "Синдром самозванца",
-        "перфекцион": "Перфекционизм",
-        "спасат": "Перестать спасать",
-        "близост": "Близость без потери себя",
-        "опор": "Найти опору в себе",
-    }
-    text_lower = text.lower()
-    for keyword, course in courses.items():
-        if keyword in text_lower:
-            daily_stats["courses_mentioned"][course] += 1
+    # Сохраняем полный лог
+    full_logs[uid].append({
+        "role": role,
+        "text": text,
+        "time": datetime.now().strftime("%H:%M")
+    })
 
 
 async def send_daily_report():
-    """Отправляем ежедневный отчёт"""
     if not ADMIN_ID:
         return
 
@@ -159,56 +139,70 @@ async def send_daily_report():
 
     if total_users == 0:
         report = "📊 *Отчёт за сегодня*\n\nСегодня никто не писал боту."
+        try:
+            await bot.send_message(ADMIN_ID, report)
+        except Exception as e:
+            logger.error(f"Ошибка отправки отчёта: {e}")
     else:
+        # Общая сводка
         report = f"📊 *Отчёт SOL & YA бот — {datetime.now().strftime('%d.%m.%Y')}*\n\n"
         report += f"👥 Всего пользователей: {total_users}\n"
         report += f"🆕 Новых сегодня: {new_users}\n"
         report += f"💬 Сообщений: {total_messages}\n\n"
 
-        # Список пользователей
         if stats["user_info"]:
             report += "👤 *Кто писал:*\n"
             for uid, info in stats["user_info"].items():
                 report += f"• {info['name']} ({info['username']}) — с {info['first_seen']}\n"
-            report += "\n"
 
-        # Топ тем
-        if stats["topics"]:
-            report += "🗣 *Темы разговоров:*\n"
-            for topic in stats["topics"][:10]:
-                report += f"• {topic}\n"
-            report += "\n"
+        try:
+            await bot.send_message(ADMIN_ID, report)
+        except Exception as e:
+            logger.error(f"Ошибка отправки сводки: {e}")
 
-        # Упомянутые курсы
-        if stats["courses_mentioned"]:
-            report += "📚 *Упомянутые курсы:*\n"
-            for course, count in sorted(stats["courses_mentioned"].items(),
-                                        key=lambda x: x[1], reverse=True):
-                report += f"• {course}: {count} раз\n"
+        # Отдельное сообщение для каждого пользователя с полным диалогом
+        for uid, info in stats["user_info"].items():
+            if uid not in full_logs or not full_logs[uid]:
+                continue
 
-    try:
-        await bot.send_message(ADMIN_ID, report)
-    except Exception as e:
-        logger.error(f"Ошибка отправки отчёта: {e}")
+            dialog = f"💬 *Диалог: {info['name']} ({info['username']})*\n"
+            dialog += f"ID: `{uid}`\n\n"
+
+            for msg in full_logs[uid]:
+                icon = "👤" if msg["role"] == "user" else "🤖"
+                dialog += f"{icon} *{msg['time']}*\n{msg['text']}\n\n"
+
+            # Разбиваем на части если длинный (лимит Telegram 4096 символов)
+            if len(dialog) <= 4096:
+                try:
+                    await bot.send_message(ADMIN_ID, dialog)
+                except Exception as e:
+                    logger.error(f"Ошибка отправки диалога: {e}")
+            else:
+                # Шлём по частям
+                parts = [dialog[i:i+4000] for i in range(0, len(dialog), 4000)]
+                for part in parts:
+                    try:
+                        await bot.send_message(ADMIN_ID, part)
+                        await asyncio.sleep(0.3)
+                    except Exception as e:
+                        logger.error(f"Ошибка отправки части диалога: {e}")
 
     # Сбрасываем статистику
     daily_stats["users"] = set()
     daily_stats["new_users"] = set()
     daily_stats["messages"] = 0
-    daily_stats["topics"] = []
-    daily_stats["courses_mentioned"] = defaultdict(int)
-    daily_stats["tests_mentioned"] = defaultdict(int)
     daily_stats["user_info"] = {}
+    full_logs.clear()
 
 
 async def daily_report_scheduler():
-    """Планировщик — отправляет отчёт каждый день в 22:00"""
     while True:
         now = datetime.now()
-        # Следующая отправка в 22:00
         target = now.replace(hour=19, minute=0, second=0, microsecond=0)
         if now >= target:
-            target = target.replace(day=target.day + 1)
+            from datetime import timedelta
+            target = target + timedelta(days=1)
         wait_seconds = (target - now).total_seconds()
         await asyncio.sleep(wait_seconds)
         await send_daily_report()
@@ -219,7 +213,8 @@ async def cmd_start(message: Message):
     user_id = message.from_user.id
     is_new = user_id not in chat_histories or len(chat_histories[user_id]) == 0
     chat_histories[user_id].clear()
-    update_stats(message.from_user, "/start", is_new)
+    full_logs[user_id].clear()
+    update_stats(message.from_user, "/start", is_new, role="user")
 
     welcome = (
         "Привет 🌿 Я психологический помощник проекта *SOL & YA*.\n\n"
@@ -227,6 +222,7 @@ async def cmd_start(message: Message):
         "выгорании или просто в том, что тяжело.\n\n"
         "Расскажи, что сейчас происходит или что тебя беспокоит. "
         "Я отвечу вдумчиво и без осуждения 💙\n\n"
+        "_Разговоры могут использоваться для улучшения сервиса._\n\n"
         "_Если хочешь начать заново — напиши /reset_"
     )
     await message.answer(welcome)
@@ -236,6 +232,7 @@ async def cmd_start(message: Message):
 async def cmd_reset(message: Message):
     user_id = message.from_user.id
     chat_histories[user_id].clear()
+    full_logs[user_id].clear()
     await message.answer(
         "История нашего разговора очищена. Можем начать с чистого листа 🌿\n"
         "Расскажи, что тебя сейчас волнует?"
@@ -244,7 +241,7 @@ async def cmd_reset(message: Message):
 
 @dp.message(Command("help"))
 async def cmd_help(message: Message):
-    help_text = (
+    await message.answer(
         "*Как я могу помочь:*\n\n"
         "💬 Просто напиши мне — я выслушаю и отвечу\n"
         "🔍 Помогу разобраться в ситуации с отношениями, тревогой, самооценкой\n"
@@ -256,12 +253,11 @@ async def cmd_help(message: Message):
         "/tests — бесплатные тесты\n\n"
         "Сайт: [sol-ya.com](https://www.sol-ya.com)"
     )
-    await message.answer(help_text)
 
 
 @dp.message(Command("courses"))
 async def cmd_courses(message: Message):
-    courses_text = (
+    await message.answer(
         "*Курсы SOL & YA* 📚\n\n"
         "🔸 [НЕТ тревоге](https://www.sol-ya.com/courses/net-trevoge)\n"
         "🔸 [Тревожная привязанность](https://www.sol-ya.com/courses/trevozhnaya-privyazannost)\n"
@@ -276,12 +272,11 @@ async def cmd_courses(message: Message):
         "🔸 [Прокрастинация](https://www.sol-ya.com/courses/prokrastinatsiya)\n\n"
         "Все курсы — PDF с теорией, практиками и заданиями. Доставляются на email 📧"
     )
-    await message.answer(courses_text)
 
 
 @dp.message(Command("tests"))
 async def cmd_tests(message: Message):
-    tests_text = (
+    await message.answer(
         "*Бесплатные тесты* 🔍\n\n"
         "✅ [Тревожность BAI](https://www.sol-ya.com/tests/beck-anxiety)\n"
         "✅ [Тип привязанности ECR-R](https://www.sol-ya.com/tests/ecr-r)\n"
@@ -301,12 +296,10 @@ async def cmd_tests(message: Message):
         "✅ [Осложнённое горе ICG](https://www.sol-ya.com/tests/gore)\n\n"
         "Все тесты бесплатны, результат приходит на email 📧"
     )
-    await message.answer(tests_text)
 
 
 @dp.message(Command("report"))
 async def cmd_report(message: Message):
-    """Команда для немедленного отчёта (только для админа)"""
     if message.from_user.id != ADMIN_ID:
         return
     await send_daily_report()
@@ -321,7 +314,7 @@ async def handle_message(message: Message):
         return
 
     is_new = user_id not in chat_histories or len(chat_histories[user_id]) == 0
-    update_stats(message.from_user, user_text, is_new)
+    update_stats(message.from_user, user_text, is_new, role="user")
 
     chat_histories[user_id].append({"role": "user", "content": user_text})
 
@@ -339,6 +332,10 @@ async def handle_message(message: Message):
         )
         assistant_reply = response.content[0].text
         chat_histories[user_id].append({"role": "assistant", "content": assistant_reply})
+
+        # Логируем ответ бота тоже
+        update_stats(message.from_user, assistant_reply, False, role="bot")
+
         await message.answer(assistant_reply)
 
     except Exception as e:
