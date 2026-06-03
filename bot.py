@@ -6,7 +6,7 @@ from datetime import datetime
 from anthropic import AsyncAnthropic
 
 from aiogram import Bot, Dispatcher, F
-from aiogram.types import Message, BotCommand
+from aiogram.types import Message, BotCommand, InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery
 from aiogram.filters import CommandStart, Command
 from aiogram.enums import ParseMode
 from aiogram.client.default import DefaultBotProperties
@@ -218,14 +218,23 @@ async def cmd_start(message: Message):
 
     welcome = (
         "Привет 🌿 Я психологический помощник проекта *SOL & YA*.\n\n"
-        "Я здесь, чтобы выслушать и помочь разобраться — в отношениях, эмоциях, тревоге, "
-        "выгорании или просто в том, что тяжело.\n\n"
-        "Расскажи, что сейчас происходит или что тебя беспокоит. "
-        "Я отвечу вдумчиво и без осуждения 💙\n\n"
-        "_Разговоры могут использоваться для улучшения сервиса._\n\n"
-        "_Если хочешь начать заново — напиши /reset_"
+        "Я здесь, чтобы выслушать и помочь разобраться — без осуждения и с заботой 💙\n\n"
+        "_Разговоры могут использоваться для улучшения сервиса._"
     )
-    await message.answer(welcome)
+
+    keyboard = InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="💔 Отношения и партнёр", callback_data="topic_relations")],
+        [InlineKeyboardButton(text="😰 Тревога и страхи", callback_data="topic_anxiety")],
+        [InlineKeyboardButton(text="🔥 Выгорание и усталость", callback_data="topic_burnout")],
+        [InlineKeyboardButton(text="🌱 Самооценка и уверенность", callback_data="topic_selfesteem")],
+        [InlineKeyboardButton(text="👨‍👩‍👧 Отношения с родителями", callback_data="topic_parents")],
+        [InlineKeyboardButton(text="💬 Просто поговорить", callback_data="topic_talk")],
+    ])
+
+    await message.answer(
+        welcome + "\n\n*С чем сейчас сложнее всего?*",
+        reply_markup=keyboard
+    )
 
 
 @dp.message(Command("reset"))
@@ -303,6 +312,51 @@ async def cmd_report(message: Message):
     if message.from_user.id != ADMIN_ID:
         return
     await send_daily_report()
+
+
+
+TOPIC_MESSAGES = {
+    "topic_relations": "Расскажи подробнее — что сейчас происходит в отношениях? Я здесь и слушаю 💙",
+    "topic_anxiety": "Тревога — это очень тяжело. Расскажи, что именно тебя беспокоит? Когда это началось?",
+    "topic_burnout": "Выгорание — это сигнал от тела и души, что что-то важное нужно изменить. Расскажи, что происходит?",
+    "topic_selfesteem": "Расскажи — в каких ситуациях это ощущается сильнее всего?",
+    "topic_parents": "Отношения с родителями бывают очень непростыми. Расскажи, что сейчас происходит?",
+    "topic_talk": "Я здесь 🌿 Расскажи что на душе — всё что хочется, без спешки.",
+}
+
+TOPIC_NAMES = {
+    "topic_relations": "💔 Отношения и партнёр",
+    "topic_anxiety": "😰 Тревога и страхи",
+    "topic_burnout": "🔥 Выгорание и усталость",
+    "topic_selfesteem": "🌱 Самооценка и уверенность",
+    "topic_parents": "👨‍👩‍👧 Отношения с родителями",
+    "topic_talk": "💬 Просто поговорить",
+}
+
+
+@dp.callback_query(F.data.startswith("topic_"))
+async def handle_topic(callback: CallbackQuery):
+    user_id = callback.from_user.id
+    topic = callback.data
+    topic_name = TOPIC_NAMES.get(topic, "")
+    reply = TOPIC_MESSAGES.get(topic, "Расскажи что тебя беспокоит 🌿")
+
+    # Логируем выбор темы
+    update_stats(callback.from_user, f"[Выбрала тему: {topic_name}]", False, role="user")
+
+    # Добавляем в историю как первое сообщение
+    chat_histories[user_id].append({
+        "role": "user",
+        "content": f"Я хочу поговорить про: {topic_name}"
+    })
+    chat_histories[user_id].append({
+        "role": "assistant",
+        "content": reply
+    })
+
+    await callback.message.edit_reply_markup(reply_markup=None)
+    await callback.message.answer(reply)
+    await callback.answer()
 
 
 @dp.message(F.text)
